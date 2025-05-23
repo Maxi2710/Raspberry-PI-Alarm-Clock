@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erfolgreich gestoppt</title>
+</head>
+<body>
+    <div class="container"></div>
+        <div class="header">
+            <h1>Wecker erfolgreich gestoppt!</h1>      
+            <h2>Sie können die Seite jetzt schließen</h2>
+        </div>
+        <div class="back_button">
+            <form action="" method="post" id="redirect">
+                <label for="input">Zum Main Menü</label>
+                <input type="submit">
+            </form>
+        </div>
+
+    <script>
+        document.getElementById("redirect").addEventListener("submit", function(event) {
+    
+            event.preventDefault();
+            const url = `http://${window.location.hostname}`;
+            window.location.replace(url);
+        });
+    </script>
+</body>
+</html>
