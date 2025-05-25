@@ -18,6 +18,8 @@ settings_post_endpoint = "/send_data"
 stop_alarm_endpoint = "/stop_alarm"
 stop_alarm_command = "stop_alarm"
 
+default_snooze_duration = 10 #Default snooze duration in seconds
+
 #Server ports for handling alarm settings and stop requests
 settings_server_port = 8080
 stop_server_port = 8081
@@ -32,7 +34,7 @@ allowed_ringtones = ["main_audio.wav", "audio1.wav", "audio2.wav", "audio3.wav",
 
 webserver_status_file = "status_files/alarm_webserver_status.status" #The file the script writes into if a alarm is set or not (Webserver uses it to display the correct page if the alarm was set)
 to_main_display_status_file = "status_files/status_to_main_display.status" #The file the script writes into if a alarm is set, ringing or change in ring time
-to_main_display_standard_write = "11:11\ninactive\nnot_ringing" #Default content for the status file from the line above (time, status, ringing state)
+default_main_display_status = "11:11\ninactive\nnot_ringing" #Default content for the status file from the line above (time, status, ringing state)
 from_main_display_status_file = "status_files/status_from_main_display_to_main.status" #Path to the status file where the main_display writes the user set tingtime into
 
 # GPIO pin assignments for the stop and snooze buttons
@@ -62,8 +64,9 @@ class SentSettingsHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         global ring_time, selected_ringtone, snooze_duration, stop_settings_server_event
 
+        #Check if the correct endpoint was called
         if self.path == settings_post_endpoint:
-            #Read and decode POST data
+            #Parse POST request to extract alarm settings from the web form
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
 
@@ -76,6 +79,7 @@ class SentSettingsHandler(BaseHTTPRequestHandler):
             with open(success_set_timer_page, "r") as file:
                 success_message = file.read()
 
+            #Replace placeholders with actual data
             success_message = success_message.replace("{{ ring_time }}", ring_time)
             success_message = success_message.replace("{{ ring_tone }}", selected_ringtone)
             success_message = success_message.replace("{{ snooze_time }}", snooze_duration)
@@ -95,18 +99,19 @@ class StopAlarmHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         global alarm_stop_requested
 
-        if self.path == stop_alarm_endpoint:
+        #Check if the correct endpoint was called
+        if (self.path == stop_alarm_endpoint):
             #Read and decode POST data
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             usable_data = urllib.parse.parse_qs(post_data.decode("utf-8"))
 
             #Check if value sent to server matches
-            if 'action' in usable_data and usable_data['action'][0] == stop_alarm_command:
+            if ('action' in usable_data and usable_data['action'][0] == stop_alarm_command):
                 alarm_stop_requested = True
                 
             else: 
-                print("Wrong paramenter was sent by the HTTP server")
+                print(f"\033[91m Wrong paramenter was sent by the HTTP server\033[0m")
         
         #Load the success confirmation page and sent response
         with open(success_stop_timer_page, "r") as file:
@@ -126,12 +131,13 @@ def run_settings_server():
     server = HTTPServer(server_address, SentSettingsHandler)
     server.timeout = 0.5
 
-    print("Starting settings post server on port:", settings_server_port)
+    print(f"\033[92mStarting settings post server on port:'{settings_server_port}'\033[0m")
 
     #Run the server until the stop_settings_server_event is set
     while not stop_settings_server_event.is_set():
         server.handle_request()
 
+    #Stop server
     server.server_close()
     print("Stopping HTTP settings server")
 
@@ -142,11 +148,13 @@ def run_stop_server():
     server = HTTPServer(server_address, StopAlarmHandler)
     server.timeout = 0.5
 
-    print("Starting stop post server on port:", stop_server_port)
+    print(f"\033[92mStarting stop post server on port:'{stop_server_port}'\033[0m")
 
+    #Run the server until the stop_stop_server_event is set
     while not stop_stop_server_event.is_set():
             server.handle_request()
 
+    #Stop server
     server.server_close()
     print("Stopping HTTP stop server")
 
@@ -160,10 +168,10 @@ def calculate_wait_seconds(target_time):
         time_now = datetime.now()
         difference_time = (target_time - time_now).total_seconds()
     except:
-        print("Time has to be HH:MM")
+        print(f"\033[91m Time has to be HH:MM\033[0m")
 
-    #If the time has already passed today, set the alarm for the next day
-    if difference_time < 0:
+    #If the specified time is earlier than the current time, schedule the alarm for the next day
+    if (difference_time < 0):
         difference_time += 86400
 
     return difference_time
@@ -174,15 +182,18 @@ def set_alarm():
     global alarm_stop_requested
 
     #Check if ringtone is in allowed_rintones
-    if selected_ringtone in allowed_ringtones:
+    if (selected_ringtone in allowed_ringtones):
         time_now = time.time()
-        check_time = 0.5
+        check_time = 0.1
 
-        #Check every 0.5 seconds if stop_alarm == True and stop alarm if it's the case
+        #Check every 0.1 seconds if alarm_stop_requested == True or stop_button == HIGH and stop alarm if it's the case
         while time.time() - time_now < seconds:
             if alarm_stop_requested:
                 print("Stopping alarm from HTTP request")
                 return
+            elif (GPIO.input(stop_button) == GPIO.HIGH):
+                 print("Stopping alarm from stop button request")
+                 return
             sleep(check_time)
 
         while not alarm_stop_requested:
@@ -194,9 +205,9 @@ def set_alarm():
             ring_tone_playing_process = subprocess.Popen(["aplay", f"{ringtone_directory}{selected_ringtone}"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
             #Alarm keeps playing until it is stopped or snoozed
-            print("GPIO Mode: ", GPIO.getmode())
+            print("GPIO Mode: ", GPIO.getmode()) #Not sure why this GPIO setup is needed again, but it works =)
             while ring_tone_playing_process.poll() is None:
-                if GPIO.input(stop_button) == GPIO.HIGH or alarm_stop_requested:
+                if (GPIO.input(stop_button) == GPIO.HIGH or alarm_stop_requested):
                     print("Stop button pressed or stopped by HTTP sever")
                     ring_tone_playing_process.terminate()
                     print("Stopping alarm")
@@ -205,7 +216,7 @@ def set_alarm():
                     sleep(0.1)
                     return
                 
-                elif GPIO.input(snooze_button) == GPIO.HIGH:
+                elif (GPIO.input(snooze_button) == GPIO.HIGH):
                     print("Snooze button pressed")
                     #Update alarm status to not_ringing so the main display reflect the correct state
                     update_main_display_status_file(2, "not_ringing")
@@ -215,7 +226,7 @@ def set_alarm():
                     sleep(snooze_time_int)
                     break
     else:
-        print("ERROR: specified ringtone is not allowed!")
+        print(f"\032[91m ERROR: specified ringtone is not in allowed_ringtones!\033[0m")
 
 #-------------------------------------------Update status files-------------------------------------------#
 
@@ -232,9 +243,9 @@ def update_main_display_status_file(line, content):
         
         #Check if the status file exists, if not, create it with default content
         if (not os.path.exists(to_main_display_status_file)):
-            print(f"\033[91m'{to_main_display_status_file}' does not exist, creating it...\033[0m")
+            print(f"\033[33m'{to_main_display_status_file}' does not exist, creating it...\033[0m")
             with open(to_main_display_status_file, "w") as status_file:
-                    status_file.write(to_main_display_standard_write)
+                    status_file.write(default_main_display_status)
         
         #Read the lines from the status file
         with open(to_main_display_status_file, "r") as status_file:
@@ -242,9 +253,9 @@ def update_main_display_status_file(line, content):
 
         #If the file has more than 3 lines, reset it to the default content
         if (len(line_count) != 3):
-                print(f"\033[91m'{to_main_display_status_file}' has more than 3 lines. Writing default content with 3 lines...\033[0m")
+                print(f"\033[33m'{to_main_display_status_file}' has more than 3 lines. Writing default content with 3 lines...\033[0m")
                 with open(to_main_display_status_file, "w") as status_file:
-                    status_file.write(to_main_display_standard_write)
+                    status_file.write(default_main_display_status)
                 
                 #Re-read the file after resetting it
                 with open(to_main_display_status_file, "r") as status_file:
@@ -252,9 +263,9 @@ def update_main_display_status_file(line, content):
 
         #Check if the specified line index is valid
         if (line < 0 or line >= len(line_count)):
-                print(f"\033[91m'{to_main_display_status_file}' has fewer lines than expected or the line index is out of range. Writing default content with 3 lines...\033[0m")
+                print(f"\033[33m'{to_main_display_status_file}' has fewer lines than expected or the line index is out of range. Writing default content with 3 lines...\033[0m")
                 with open(to_main_display_status_file, "w") as status_file:
-                    status_file.write(to_main_display_standard_write)
+                    status_file.write(default_main_display_status)
         else:
             #Update the specified line with the new content
             line_count[line] = content + "\n"
@@ -264,26 +275,32 @@ def update_main_display_status_file(line, content):
                 status_file.writelines(line_count)
                 print("writing status to: " + to_main_display_status_file)
 
-def setUserRingTimeFromMainDisplay():
+def check_main_display_input():
      global ring_time, snooze_duration, selected_ringtone
 
+    #Loop until the settings server is told to stop
      while not stop_settings_server_event.is_set():
         try:
-               with open(from_main_display_status_file, "r") as status_file:
+                #Try to open and read the status file where the main display writes user-set alarm time
+                with open(from_main_display_status_file, "r") as status_file:
                     file_content = status_file.read().strip()
         except FileNotFoundError:
+               #If the file does not exist, just set file_content to empty string and continue
                file_content = ""
         
+        #Use regex to check if the content matches HH:MM
         match = re.match(r"^([01]?\d|2[0-3]):([0-5]?\d)$", file_content)
 
         if match:
-             ring_time = file_content
-             snooze_duration = 5
-             selected_ringtone = "main_audio.wav"
-             print("Alarm set due to user imput form the main display")
+            #If a valid time was found, update global alarm settings accordingly
+            ring_time = file_content
+            snooze_duration = default_snooze_duration
+            selected_ringtone = "main_audio.wav"
+            print("Alarm set due to user imput form the main display")
 
-             stop_settings_server_event.set()
-             break
+            #Signal to stop the settings server
+            stop_settings_server_event.set()
+            break
 
 #------------------------------------------------Main code------------------------------------------------#
 
@@ -291,8 +308,9 @@ def setUserRingTimeFromMainDisplay():
 while True:
     try:
         #Set alarm status to inactive so the webserver and main display displays the correct page
+        #The ring time can be set to any value in HH:MM format — the specific time doesn't matter, only that a time is provided
         write_to_webserver_status(False)
-        update_main_display_status_file(0, "11:00")
+        update_main_display_status_file(0, "6:00")
         update_main_display_status_file(1, "inactive")
         update_main_display_status_file(2, "not_ringing")
 
@@ -301,11 +319,11 @@ while True:
         settings_server_thread.start()
 
         #Start the watcher thread server in a separate thread (waits for main display to sent a user set ring time)
-        watcher_thread = threading.Thread(target=setUserRingTimeFromMainDisplay)
-        watcher_thread.start()
+        main_display_thread = threading.Thread(target=check_main_display_input)
+        main_display_thread.start()
 
         settings_server_thread.join()
-        watcher_thread.join()
+        main_display_thread.join()
 
         #Print received alarm settings for debugging
         print("Ringtime set by user:", ring_time)
@@ -367,8 +385,5 @@ while True:
         print("End of program cycle. Waiting for settings server to start...")
 
 
-#Vom main Display die Snooze time und Klingelton als Globale Variable machen
-#Fehlermeldungen rot machen
-#Fehlende Kommentare hinzufügen
-#Mehr Fehler abfangen und versuchen selbst zu beheben
-#Wecker soll Über stop button gestoppt werden können, wenn er noch nicht klingelt
+#FixMe
+#Alarm can't be stopped while snoozing
