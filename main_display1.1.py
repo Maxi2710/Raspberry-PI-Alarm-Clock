@@ -44,23 +44,36 @@ GPIO.setup(menu_button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 #Only if the status file exists and contains exactly three lines:
 #Writes the content of the status file into global variables
 def read_alarm_status_from_main():
-        
     global alarm_active, ring_time, ringing
 
-    try:
-        with open(status_from_main, "r") as status_file:
-            
-            lines = [line.strip() for line in status_file.readlines()]
+    attempt = 0
+    max_attempts = 3
 
-            if (len (lines) == 3):
-                ring_time = lines[0]
-                alarm_active = (lines[1] == "active")
-                ringing = (lines[2] == "ringing")
-            else:
-                print("Error: " + status_from_main + " has to have exactly 3 lines")
+    #Try up to max_attempts times to read the file
+    while attempt < max_attempts:
+        try:
+            with open(status_from_main, "r") as status_file:
+                #Read all lines and strip whitespace
+                lines = [line.strip() for line in status_file.readlines()]
 
-    except FileNotFoundError:
-        print("Error: " + status_from_main + " does not exist. Try starting main scirpt")
+                #Ensure the file contains exactly 3 lines
+                if len(lines) == 3:
+                    ring_time = lines[0]                    #Line 1: Time when alarm is set (e.g. "07:30")
+                    alarm_active = (lines[1] == "active")   #Line 2: Alarm status ("active" or inactive)
+                    ringing = (lines[2] == "ringing")       #Line 3: Ringing status ("ringing" or not_ringing)
+                    return
+                else:
+                    print(f"\033[33m Warning: '{status_from_main}' must contain exactly 3 lines. Retrying...\033[0m")
+
+        except FileNotFoundError:
+            #File not found, remind the user to run the main script first
+            print(f"\033[91m Error: '{status_from_main}' does not exist. Try starting main script.\033[0m")
+
+        attempt = attempt + 1
+        sleep(1) # Wait 1 second before retrying
+
+    print(f"\033[91m Error: Failed to read '{status_from_main}' after {max_attempts} attempts. Waiting 10 seconds and trying again...\033[0m")
+    sleep(10)
 
 
 #Returns the current date or time depending of the argument given to the function:
@@ -79,7 +92,7 @@ def get_time_date(time_or_date):
         datenow = int(date.strftime("%w"))
         return week_days[datenow]
     else:
-        print("Please specify whether you want the <date> or the <time>")
+        print(f"\033[91m Error: Please specify whether you want the <date> or the <time>\033[0m")
 
 
 #Updating the content of the lcd display, only if the content has changed
@@ -96,6 +109,7 @@ def write_to_display(line1, line2):
         print("Wrote to Line 1 on main display: " + line1.strip())
         print("Wrote to Line 2 on main display: " + line2.strip())
 
+#Writes selected ringtime to the status file for the main program to read
 def write_to_main_status(ringtime):
     with open(status_to_main, "w") as status_file:
             status_file.write(ringtime)
@@ -121,10 +135,11 @@ def main_display_menu_button_pressed():
     update_menu_time(default_alarm_hour, default_alarm_minute)
     print("Menu opend")
 
-    #Waits for user imput and performes actions
+    #Main loop to capture user input for setting the alarm time
     while True:
         sleep(0.1)
 
+        #UP button increases time
         if (GPIO.input(up_button) == GPIO.HIGH):
             press_time = time.time()
             while GPIO.input(up_button) == GPIO.HIGH:
@@ -135,23 +150,27 @@ def main_display_menu_button_pressed():
                     adjust_menu_time(menu_time_increment)
                     sleep(0.1)
             sleep(0.01)
-            
+        
+        #DOWN button decreases time
         elif (GPIO.input(down_button) == GPIO.HIGH):
             press_time = time.time()
             while GPIO.input(down_button) == GPIO.HIGH:
                 elapsed = time.time() - press_time
                 if elapsed > 1:
-                    adjust_menu_time(menu_time_increment * 5)
+                    adjust_menu_time(-menu_time_increment * 5)
                 else:
-                    adjust_menu_time(menu_time_increment)
+                    adjust_menu_time(-menu_time_increment)
                     sleep(0.1)
             sleep(0.01)
         
+        #MENU button exits the menu without saving
         elif(GPIO.input(menu_button) == GPIO.HIGH):
             sleep(0.1)
             user_set_ringtime = None
             print("Menu closed")
             break
+
+        #OK button confirms the selected time
         elif(GPIO.input(ok_button) == GPIO.HIGH):
             user_set_ringtime = f"{default_alarm_hour:02}:{default_alarm_minute:02}"
             main_display.clear()
@@ -202,16 +221,21 @@ while True:
     if(GPIO.input(menu_button) == GPIO.HIGH):
              main_display_menu_button_pressed()
              sleep(0.1)
-             last_display_content = False
+             last_display_content = False #Reset display state to force update
              continue
     
+    #Alarm is set but not ringing
     elif(alarm_active and not ringing):
         write_to_display("    " + get_time_date("date") + " " + get_time_date("time"), "Wecker um: " + ring_time)
+
+    #Alarm is currently ringing
     elif(alarm_active and ringing):
         write_to_display("    " + get_time_date("date") + " " + get_time_date("time"), " (*) Wecker (*)")
     
+    #No alarm set
     else:
         write_to_display("    " + get_time_date("date") + " " + get_time_date("time"), "  Keine Wecker")
 
 
-#Bildschirm je nach Helligkeit ein oder ausschalten unnd wenn auf knopf gedrückt wird wieder einschalten
+#Feature request:
+#Turn the screen off or on depending on brightness, and turn it back on when the button is pressed
