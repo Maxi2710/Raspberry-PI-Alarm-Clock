@@ -384,6 +384,5 @@ while True:
 
         print("End of program cycle. Waiting for settings server to start...")
 
-
 #FixMe
 #Alarm can't be stopped while snoozing
