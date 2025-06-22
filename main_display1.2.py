@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 from datetime import datetime
 from time import sleep
 import time
+import threading
 
 #-------------------------------------define Variables and GPIO setup-------------------------------------#
 
@@ -16,6 +17,7 @@ ok_button = 16 #GPIO input for OK-Button
 down_button= 18 #GPIO input for DOWN-BUTTON
 up_button = 22 #GPIO input for UP-BUTTON
 menu_button = 24 #GPIO input for MENU-BUTTON
+daylight_resistor_pin = 11 #GPIO input for DAYLIGHT_RESISTOR
 
 default_alarm_hour = 6 # Default alarm time displayed when opening the menu
 default_alarm_minute = 0 # Default alarm time displayed when opening the menu
@@ -29,6 +31,7 @@ ring_time = None #Stores the alarm time
 ringing = False #Indicates if the alarm is currently ringing
 last_display_content = False #Stores the last content displayed on the LCD
 user_set_ringtime = None #Stores the alarm time set by the user
+auto_backlight_control = True #Indicates if the backlight should be automaticly controlled or not
 
 #GPIO setup
 GPIO.setwarnings(False)
@@ -114,6 +117,37 @@ def write_to_main_status(ringtime):
     with open(status_to_main, "w") as status_file:
             status_file.write(ringtime)
 
+#Measures the brightness level in the room using a light-dependent resistor and a capacitor. The charging time of the capacitor depends on the light intensity:
+#The brighter it is, the faster it charges.
+def get_brightnes():
+
+    #Discharge the capacitor by setting the pin to output and driving it LOW
+    GPIO.setup(daylight_resistor_pin, GPIO.OUT)
+    GPIO.output(daylight_resistor_pin, GPIO.LOW)
+    time.sleep(0.1)
+    
+    #Set the pin to input mode to start measuring the capacitor charging tim
+    GPIO.setup(daylight_resistor_pin, GPIO.IN)
+    currentTime = time.time()
+    diff = 0
+    
+    #Wait until the capacitor has charged enough to pull the pin HIGH
+    while(GPIO.input(daylight_resistor_pin) == GPIO.LOW):
+        diff  = time.time() - currentTime
+
+    #Convert the charging time to a brightness value (shorter time = more light)
+    brightness = round(diff * 1000) #Convert seconds to milliseconds
+
+    #Return the measured brightness value
+    return brightness
+
+def backlight_control ():
+    while True:
+        if(get_brightnes() > 100 and auto_backlight_control == True):
+            main_display.backlight_enabled = False
+        else:
+            main_display.backlight_enabled = True
+        sleep(2)
 #---------------------------------------------Menu Functions----------------------------------------------#
 
 #Opens a settings menu, where the user can make changes to the alarm ring time
@@ -214,16 +248,22 @@ def adjust_menu_time(minutes):
 
 #------------------------------------------------Main Code------------------------------------------------#
 
+backlight_control_thread = threading.Thread(target=backlight_control, daemon=True)
+backlight_control_thread.start()
 
 while True:
+
     read_alarm_status_from_main()
 
     if(GPIO.input(menu_button) == GPIO.HIGH):
-             main_display_menu_button_pressed()
-             sleep(0.1)
-             last_display_content = False #Reset display state to force update
-             continue
-    
+            auto_backlight_control = False #Stop the automatic backlight control
+            main_display.backlight_enabled = True #Turn on the backlight
+            main_display_menu_button_pressed()
+            sleep(0.1)
+            last_display_content = False #Reset display state to force update
+            auto_backlight_control = True #Restart the automatic backlight control
+            continue
+
     #Alarm is set but not ringing
     elif(alarm_active and not ringing):
         write_to_display("    " + get_time_date("date") + " " + get_time_date("time"), "Wecker um: " + ring_time)
@@ -235,7 +275,5 @@ while True:
     #No alarm set
     else:
         write_to_display("    " + get_time_date("date") + " " + get_time_date("time"), "  Keine Wecker")
-
-
 #Feature request:
 #Turn the screen off or on depending on brightness, and turn it back on when the button is pressed
