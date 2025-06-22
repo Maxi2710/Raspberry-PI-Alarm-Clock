@@ -39,6 +39,7 @@ sudo timedatectl set-timezone Europe/Berlin
 sudo apt install ntp -y
 ```
 change the timezone accordingly
+
 <br/>
 
 ### 3. Install Python
