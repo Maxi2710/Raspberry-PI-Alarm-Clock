@@ -96,3 +96,16 @@ Select:
     ```
 <br/>
 Confirm with Yes, then OK and Finish
+
+Install the LCD library:
+```bash
+sudo reboot
+git clone https://github.com/dbrgn/RPLCD.git
+cd RPLCD
+sudo python3 setup.py install
+sudo reboot
+```
+
+<br/>
+
+### 6. Clone and Set Up This Project
