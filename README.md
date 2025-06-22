@@ -85,15 +85,9 @@ sudo service nginx restart
 sudo raspi-config
 ```
 
-Navigate to:
-    ```bash
-    5 Interfacing Options
-    ```
+Navigate to: ```5 Interfacing Options ```
 <br/>
-Select:
-    ```bash
-    P5 I2C
-    ```
+Select: ``` P5 I2C ```
 <br/>
 Confirm with Yes, then OK and Finish
 
@@ -119,7 +113,7 @@ sudo reboot
 
 ### PHP Configuration:
 
-Set these values (replace ```bash version``` with your actual PHP version):
+Set these values (replace ```version``` with your actual PHP version):
 ```bash
 sudo nano /etc/php/version/fpm/php.ini
 ```
