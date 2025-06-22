@@ -110,6 +110,8 @@ sudo reboot
 
 ### 6. Clone and Set Up This Project
 
+<br/>
+
 ---
 
 ## Optional: Increase File Upload Limits (for larger audio files)
