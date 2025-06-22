@@ -3,7 +3,7 @@ A alarm clock made of a raspberry pi, some python code and a bit of 3D printing
 
 ## Features
 
-- Set and manage alarms through a web interface
+- Set and manage alarms through physical buttons and a web interface
 - Alarm playback with customizable audio
 - Optional LCD display via I2C
 - Built-in NGINX + PHP web server
