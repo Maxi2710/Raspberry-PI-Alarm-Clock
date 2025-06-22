@@ -109,6 +109,7 @@ sudo reboot
 <br/>
 
 ### 6. Clone and Set Up This Project
+(Comming soon)
 
 <br/>
 
