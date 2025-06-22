@@ -34,11 +34,11 @@ sudo apt update && sudo apt upgrade -y
 
 ### 2. Set timezone and Sync Time
 
+change the timezone accordingly
 ```bash
 sudo timedatectl set-timezone Europe/Berlin
 sudo apt install ntp -y
 ```
-change the timezone accordingly
 
 <br/>
 
