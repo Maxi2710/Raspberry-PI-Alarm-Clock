@@ -31,6 +31,7 @@ Always begin with updating the Raspberry Pi:
 sudo apt update && sudo apt upgrade -y
 ```
 
+
 ### 2. Set timezone and Sync Time
 
 ```bash
@@ -39,11 +40,13 @@ sudo apt install ntp -y
 ```
 change the timezone accordingly
 
+
 ### 3. Install Python
 
 ```bash
 sudo apt install python3.6  # Or use the latest available version
 ```
+
 
 ### 4. Install and Configure Web Server (NGINX + PHP)
 
