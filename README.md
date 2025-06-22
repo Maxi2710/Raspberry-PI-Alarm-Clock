@@ -109,3 +109,15 @@ sudo reboot
 <br/>
 
 ### 6. Clone and Set Up This Project
+
+---
+
+## Optional: Increase File Upload Limits (for larger audio files)
+
+### PHP Configuration:
+
+Set these values (replace <version> with your actual PHP version):
+```bash
+sudo nano /etc/php/<version>/fpm/php.ini
+```
+
