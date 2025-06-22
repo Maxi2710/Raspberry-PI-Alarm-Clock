@@ -3,68 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erfolgreich gespeichert</title>
+    <title>Arming alarm...</title>
+    <script>
+        setTimeout(() => {
+            window.location.href = "http://" + window.location.hostname;
+        }, 800);
+    </script>
 </head>
 <style>
     body {
-        font-family: sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #fff;
+        color: #000000;
         display: flex;
-        justify-content: center;
         align-items: center;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    .container {
-        text-align: center;
-    }
-
-    .container .header {
-        font-size: 100%;
-    }
-
-    .container .header h1 {
-        color: green;
-        font-size: 7vmin;
-    }
-
-    .container .header h2 {
-        color: #888;
-        font-size: 5vmin;
-    }
-
-    .container .information {
-        margin-top: 50px;
-        font-size: 4vmin;
-        color: #888;;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 10px;
     }
 </style>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Wecker erfolgreich gestellt!</h1>      
-            <h2>Sie können die Seite jetzt schließen</h2>
-        </div>
-        <div class="back_button">
-            <form action="" method="post" id="redirect">
-                <label for="input">Zum Main Menü</label>
-                <input type="submit">
-            </form>
-        </div>
-        <div class="information">
-            <p><b>Weckzeit:</b> {{ ring_time }}</p>
-            <p><b>Weckton:</b> {{ ring_tone }}</p>
-            <p><b>Schlummerzeit:</b> {{ snooze_time }}</p>
-        </div>
-    </div>
-
-    <script>
-        document.getElementById("redirect").addEventListener("submit", function(event) {
-    
-            event.preventDefault();
-            const url = `http://${window.location.hostname}`;
-            window.location.replace(url);
-        });
-    </script>
+    <p>Arming alarm...</p>
 </body>
 </html>
