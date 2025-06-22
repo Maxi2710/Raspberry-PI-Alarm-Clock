@@ -125,8 +125,8 @@ sudo nano /etc/php/version/fpm/php.ini
 
 Change the upload filesize to someting larger:
 ```ini
-upload_max_filesize = 20M
-post_max_size = 20M
+upload_max_filesize = 200M
+post_max_size = 200M
 ```
 
 Restart services:
@@ -143,7 +143,7 @@ sudo nano /etc/nginx/nginx.conf
 
 Inseide the http block, add:
 ```bash
-client_max_body_size 20M;
+client_max_body_size 200M;
 ```
 
 Restart NGINX again:
