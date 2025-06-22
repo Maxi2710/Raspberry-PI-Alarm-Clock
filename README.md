@@ -39,12 +39,14 @@ sudo timedatectl set-timezone Europe/Berlin
 sudo apt install ntp -y
 ```
 change the timezone accordingly
+<br/>
 
 ### 3. Install Python
 
 ```bash
 sudo apt install python3.6  # Or use the latest available version
 ```
+<br/>
 
 ### 4. Install and Configure Web Server (NGINX + PHP)
 
