@@ -60,18 +60,18 @@ Modify the config file:
 sudo nano /etc/nginx/sites-enabled/default
 ```
 
-Uncomment or add the following block:
-  ```nginx
-  location ~ \.php$ {
-  include snippets/fastcgi-php.conf;
-  fastcgi_pass unix:/run/php/php-fpm.sock;
-  }
-  ```
+- Uncomment or add the following block:
+    ```nginx
+    location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    ```
   
-Modify the index directive:
-  ```nginx
-  index index.php index.html index.htm index.nginx-debian.html;
-  ```
+- Modify the index directive:
+    ```nginx
+    index index.php index.html index.htm index.nginx-debian.html;
+    ```
 
 Restart NGINX:
 ```bash
