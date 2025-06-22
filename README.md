@@ -116,8 +116,21 @@ sudo reboot
 
 ### PHP Configuration:
 
-Set these values (replace "<version>" with your actual PHP version):
+Set these values (replace "version" with your actual PHP version):
 ```bash
-sudo nano /etc/php/<version>/fpm/php.ini
+sudo nano /etc/php/version/fpm/php.ini
 ```
 
+Change the upload filesize to someting larger:
+```ini
+upload_max_filesize = 20M
+post_max_size = 20M
+```
+
+Restart services:
+```bash
+sudo service nginx restart
+```
+<br/>
+
+### NGINX Configuration
