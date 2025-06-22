@@ -44,3 +44,14 @@ change the timezone accordingly
 ```bash
 sudo apt install python3.6  # Or use the latest available version
 ```
+
+### 4. Install and Configure Web Server (NGINX + PHP)
+
+```bash
+sudo apt install nginx php php-fpm -y
+```
+
+Modify the config file:
+```bash
+sudo nano /etc/nginx/sites-enabled/default
+```
