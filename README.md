@@ -77,3 +77,15 @@ Restart NGINX:
 ```bash
 sudo service nginx restart
 ```
+<br/>
+
+### 5. Enable I2C Interface (for LCD Display)
+
+```bash
+sudo raspi-config
+```
+
+Navigate to:
+  ```bash
+  5 Interfacing Options
+  ```
