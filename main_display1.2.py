@@ -275,5 +275,3 @@ while True:
     #No alarm set
     else:
         write_to_display("    " + get_time_date("date") + " " + get_time_date("time"), "  Keine Wecker")
-#Feature request:
-#Turn the screen off or on depending on brightness, and turn it back on when the button is pressed
