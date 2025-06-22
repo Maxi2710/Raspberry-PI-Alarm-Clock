@@ -89,8 +89,10 @@ Navigate to:
     ```bash
     5 Interfacing Options
     ```
+<br/>
 Select:
     ```bash
     P5 I2C
     ```
+<br/>
 Confirm with Yes, then OK and Finish
