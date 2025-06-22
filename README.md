@@ -56,7 +56,7 @@ Modify the config file:
 sudo nano /etc/nginx/sites-enabled/default
 ```
 
-  Uncomment or add the following block:
+  - Uncomment or add the following block:
   ```nginx
   location ~ \.php$ {
     include snippets/fastcgi-php.conf;
@@ -64,7 +64,7 @@ sudo nano /etc/nginx/sites-enabled/default
   }
   ```
   
-  Modify the index directive:
+  - Modify the index directive:
   ```nginx
   index index.php index.html index.htm index.nginx-debian.html;
   ```
