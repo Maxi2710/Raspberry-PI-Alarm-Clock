@@ -85,7 +85,12 @@ sudo service nginx restart
 sudo raspi-config
 ```
 
-Navigate to:
+- Navigate to:
     ```bash
     5 Interfacing Options
     ```
+- Select:
+    ```bash
+    P5 I2C
+    ```
+- Confirm with Yes, then OK and Finish
