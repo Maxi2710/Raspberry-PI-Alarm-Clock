@@ -86,7 +86,9 @@ sudo raspi-config
 ```
 
 Navigate to: ```5 Interfacing Options ```
+<br/>
 Select: ``` P5 I2C ```
+<br/>
 Confirm with Yes, then OK and Finish
 
 Install the LCD library:
