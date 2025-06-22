@@ -119,7 +119,7 @@ sudo reboot
 
 ### PHP Configuration:
 
-Set these values (replace "version" with your actual PHP version):
+Set these values (replace ```bash version``` with your actual PHP version):
 ```bash
 sudo nano /etc/php/version/fpm/php.ini
 ```
