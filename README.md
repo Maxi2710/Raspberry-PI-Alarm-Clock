@@ -55,3 +55,10 @@ Modify the config file:
 ```bash
 sudo nano /etc/nginx/sites-enabled/default
 ```
+- Uncomment or add the following block:
+  ```bash
+  location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/run/php/php-fpm.sock;
+  }
+  ```
