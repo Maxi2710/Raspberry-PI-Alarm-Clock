@@ -86,6 +86,6 @@ sudo raspi-config
 ```
 
 Navigate to:
-  ```bash
-  5 Interfacing Options
-  ```
+    ```bash
+    5 Interfacing Options
+    ```
