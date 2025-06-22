@@ -136,3 +136,17 @@ sudo service nginx restart
 <br/>
 
 ### NGINX Configuration
+
+```bash
+sudo nano /etc/nginx/nginx.conf
+```
+
+Inseide the http block, add:
+```bash
+client_max_body_size 20M;
+```
+
+Restart NGINX again:
+```bash
+sudo service nginx restart
+```
