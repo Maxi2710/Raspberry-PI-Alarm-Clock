@@ -31,6 +31,7 @@ Always begin with updating the Raspberry Pi:
 sudo apt update && sudo apt upgrade -y
 ```
 <br/>
+
 ### 2. Set timezone and Sync Time
 
 ```bash
