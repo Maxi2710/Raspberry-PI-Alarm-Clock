@@ -141,11 +141,12 @@ Inseide the http block, add:
 client_max_body_size 200M;
 ```
 
-<br/>
-
-### This message is for my informatik teacher
-wie haben uns entschiedenen einen Wecker zu bauen, da dies nach einem Bestellsystem das einzige war, was uns eingefallen ist. Desweiteren hat Finn im Moment keinen richtigen Wecker und wollte Diesn dann auch für sich privat verwenden.
 Restart NGINX again:
 ```bash
 sudo service nginx restart
 ```
+
+<br/>
+
+### This message is for my informatik teacher
+wie haben uns entschiedenen einen Wecker zu bauen, da dies nach einem Bestellsystem das einzige war, was uns eingefallen ist. Desweiteren hat Finn im Moment keinen richtigen Wecker und wollte Diesn dann auch für sich privat verwenden.
