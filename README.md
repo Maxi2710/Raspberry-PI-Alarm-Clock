@@ -148,5 +148,5 @@ sudo service nginx restart
 
 <br/>
 
-### This message is for my informatik teacher
+### This message is for my IT teacher
 Wir haben uns entschiedenen einen Wecker zu bauen, da dies nach einem Bestellsystem das Einzige war, was uns eingefallen ist. Desweiteren hat Finn im Moment keinen richtigen Wecker und wollte Diesen dann auch für sich privat verwenden. 
